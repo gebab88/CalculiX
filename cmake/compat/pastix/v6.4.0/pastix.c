@@ -916,6 +916,10 @@ ITG pastix_solve_generic(double *x, ITG *neq,ITG *symmetryflag,ITG *nrhs){
     //spmScalMat( 1./normA, spm, nrhs, x, spm->nexp );
     memcpy(b, x, sizeof(double) * (*nrhs) * (*neq));
 
+    // PaStiX only ever increases IPARM_NBITER, reset it to get the
+    // number of refinement iterations of this solve
+    piparm[IPARM_NBITER] = 0;
+
     // solve and refine in one call, check if suitable because of GPU!
     rc = pastix_task_solve_and_refine( pastix_data, spm->n, *nrhs, (void*)b, spm->n, (void*)x, spm->n );
 
@@ -929,7 +933,18 @@ ITG pastix_solve_generic(double *x, ITG *neq,ITG *symmetryflag,ITG *nrhs){
             return -2;
         }
     }
-	
+
+    // the refinement returns PASTIX_SUCCESS even if it stopped at
+    // IPARM_ITERMAX without reaching DPARM_EPSILON_REFINEMENT; in mixed
+    // precision the solution can then be far off, so report it as not
+    // converged to trigger the fallback to double precision
+    if( rc == PASTIX_SUCCESS && !globDoublePrecision &&
+        piparm[IPARM_NBITER] >= piparm[IPARM_ITERMAX] ){
+        printf("PaStiX: refinement did not converge in mixed precision\n");
+        SFREE(b);
+        return -1;
+    }
+
 //    FILE *f=fopen("spm.out","a");
 //    fprintf(f,"\n\nMatrix\n");
 //    spmConvert(SpmCSR, spm);

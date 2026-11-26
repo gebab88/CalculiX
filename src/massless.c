@@ -87,7 +87,11 @@ void massless(ITG *kslav,ITG *lslav,ITG *ktot,ITG *ltot,double *au,double *ad,
 #endif
     }else if(*isolver==8){
 #ifdef PASTIX
-      pastix_solve_cp(qb,neqtot,&symmetryflag,&nrhs);
+      /* nothing to do: pastix_factor_main_cp releases the previous
+	 factorization itself; calling pastix_solve_cp here would solve
+	 qb a second time (wrong result), and an extra pastix_cleanup_cp
+	 would leave the PaStiX data inconsistent for the next
+	 factorization */
 #endif
     }
     SFREE(jqbi);SFREE(aubi);SFREE(irowbi);
@@ -620,7 +624,10 @@ void massless(ITG *kslav,ITG *lslav,ITG *ktot,ITG *ltot,double *au,double *ad,
 #endif
       }else if(*isolver==8){
 #ifdef PASTIX
-	pastix_solve_cp(qb,neqtot,&symmetryflag,&nrhs);
+	/* nothing to do: pastix_factor_main_cp releases the previous
+	   factorization itself at the next increment; calling
+	   pastix_solve_cp here would solve qb a second time (wrong
+	   result) */
 #endif
       }
     }

@@ -150,6 +150,6 @@ cmake --preset gnu-lp64 \
   -DPASTIX=ON
 cmake --build --preset gnu-lp64 -j
 ```
-The executable is found at `build/gnu-lp64/CalculiX`. If CMake does not find the MacPorts libraries in `/opt/local`, add `-DCMAKE_PREFIX_PATH=/opt/local` to the configure command (see section 2.3).
+The executable is found at `build/gnu-lp64/CalculiX`. If CMake does not find the MacPorts libraries in `/opt/local`, add `-DCMAKE_PREFIX_PATH=/opt/local` to the configure command (see section 2.3). The linker warning `ignoring duplicate libraries: 'libccx.a'` is harmless: `ccx` is listed twice on the link line on purpose, so that libraries from `CCX_EXTRA_LIBS` can use its symbols (see section 2.4).
 
 __Note:__ The PaStiX package from MacPorts is built with 32-bit integers, so use the LP64 preset `gnu-lp64` as shown above and not `gnu-ilp64`: the integer sizes of CalculiX and PaStiX must match. CMake will warn that PaStiX with `CALCULIX_INT64=OFF` is an untested combination (see the note in section 2.2.3). With these packages it is the only consistent choice, but it is a good idea to check a few examples from `test/` against their `.dat.ref` reference files.
